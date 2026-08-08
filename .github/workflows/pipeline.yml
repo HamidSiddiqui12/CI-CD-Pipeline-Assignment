@@ -3,7 +3,7 @@ name: Flask CI/CD
 on:
   push:
     branches:
-      - master
+      - main
 
 permissions:
   contents: read
