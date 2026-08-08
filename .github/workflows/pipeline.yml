@@ -1,0 +1,85 @@
+name: Flask CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REGISTRY: 097466312208.dkr.ecr.us-east-1.amazonaws.com
+  ECR_REPOSITORY: flask-cicd-app
+  IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest
+
+      - name: Run tests
+        run: python -m pytest
+
+      - name: Configure AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        run: |
+          aws ecr get-login-password --region "$AWS_REGION" |
+          docker login --username AWS --password-stdin "$ECR_REGISTRY"
+
+      - name: Build and push image
+        run: |
+          docker build -t "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" .
+          docker push "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+
+      - name: Deploy to EC2
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/ec2_key
+          chmod 600 ~/.ssh/ec2_key
+          ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts
+
+          ssh -i ~/.ssh/ec2_key ec2-user@"${{ secrets.EC2_HOST }}" << EOF
+            set -e
+
+            aws ecr get-login-password --region "$AWS_REGION" |
+              docker login --username AWS --password-stdin "$ECR_REGISTRY"
+
+            docker pull "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+
+            docker stop flask-cicd-app 2>/dev/null || true
+            docker rm flask-cicd-app 2>/dev/null || true
+
+            docker run -d \
+              --name flask-cicd-app \
+              --restart unless-stopped \
+              -p 5000:5000 \
+              "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+
+            sleep 5
+
+            curl --fail http://localhost:5000/health
+
+            echo "Deployment successful."
+          EOF
