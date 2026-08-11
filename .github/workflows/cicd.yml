@@ -221,6 +221,18 @@ jobs:
           echo "Deployment successful!"
           echo "======================================"
 
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/ec2_key
+          chmod 600 ~/.ssh/ec2_key
+
+          echo "Checking SSH key..."
+          ssh-keygen -y -f ~/.ssh/ec2_key > /tmp/ec2_public_key
+          echo "SSH key is valid."
+
+          echo "Testing EC2 host..."
+          ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts
+
+          echo "Connecting to EC2..."
+
           EOF
 
 
