@@ -1,60 +1,61 @@
-- name: Deploy to EC2
-  run: |
-    echo "Starting EC2 deployment..."
+      name: Deploy to EC2
+        run: |
+          echo "Starting EC2 deployment..."
 
-    mkdir -p ~/.ssh
+          mkdir -p ~/.ssh
 
-    echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/ec2_key
-    chmod 600 ~/.ssh/ec2_key
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/ec2_key
+          chmod 600 ~/.ssh/ec2_key
 
-    echo "Testing EC2 host..."
-    ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts
+          echo "Testing EC2 host..."
+          ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts
 
-    echo "Connecting to EC2..."
+          echo "Connecting to EC2..."
 
-    ssh -v \
-      -o ConnectTimeout=15 \
-      -i ~/.ssh/ec2_key \
-      ec2-user@"${{ secrets.EC2_HOST }}" << EOF
+          ssh -v \
+            -o ConnectTimeout=15 \
+            -i ~/.ssh/ec2_key \
+            ec2-user@"${{ secrets.EC2_HOST }}" << EOF
 
-      set -e
+            set -e
 
-      echo "Connected to EC2 successfully."
-      echo "Checking AWS identity..."
-      aws sts get-caller-identity
+            echo "Connected to EC2 successfully."
 
-      echo "Checking Docker..."
-      docker --version
+            echo "Checking AWS identity..."
+            aws sts get-caller-identity
 
-      echo "Logging into ECR..."
-      aws ecr get-login-password --region "$AWS_REGION" |
-        docker login --username AWS --password-stdin "$ECR_REGISTRY"
+            echo "Checking Docker..."
+            docker --version
 
-      echo "Pulling Docker image..."
-      docker pull "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+            echo "Logging into ECR..."
+            aws ecr get-login-password --region "$AWS_REGION" |
+              docker login --username AWS --password-stdin "$ECR_REGISTRY"
 
-      echo "Stopping old container..."
-      docker stop flask-cicd-app 2>/dev/null || true
+            echo "Pulling Docker image..."
+            docker pull "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
-      echo "Removing old container..."
-      docker rm flask-cicd-app 2>/dev/null || true
+            echo "Stopping old container..."
+            docker stop flask-cicd-app 2>/dev/null || true
 
-      echo "Starting new container..."
-      docker run -d \
-        --name flask-cicd-app \
-        --restart unless-stopped \
-        -p 5000:5000 \
-        "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+            echo "Removing old container..."
+            docker rm flask-cicd-app 2>/dev/null || true
 
-      echo "Checking container..."
-      docker ps
+            echo "Starting new container..."
+            docker run -d \
+              --name flask-cicd-app \
+              --restart unless-stopped \
+              -p 5000:5000 \
+              "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
-      echo "Waiting for Flask..."
-      sleep 5
+            echo "Checking container..."
+            docker ps
 
-      echo "Testing health endpoint..."
-      curl --fail http://localhost:5000/health
+            echo "Waiting for Flask..."
+            sleep 5
 
-      echo "Deployment successful!"
+            echo "Testing health endpoint..."
+            curl --fail http://localhost:5000/health
 
-    EOF
+            echo "Deployment successful!"
+
+          EOF
