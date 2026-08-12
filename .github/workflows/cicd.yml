@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: Flask CI/CD
 
 on:
   push:
@@ -6,21 +6,21 @@ on:
       - main
 
 permissions:
-  id-token: write
   contents: read
+  id-token: write
 
 env:
   AWS_REGION: us-east-1
-  ECR_REPOSITORY: flask-cicd-app
   ECR_REGISTRY: 097466312208.dkr.ecr.us-east-1.amazonaws.com
+  ECR_REPOSITORY: flask-cicd-app
+  IMAGE_TAG: ${{ github.sha }}
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Python
@@ -32,10 +32,10 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install pytest
 
       - name: Run tests
-        run: |
-          python -m pytest
+        run: python -m pytest
 
       - name: Configure AWS
         uses: aws-actions/configure-aws-credentials@v4
@@ -45,144 +45,41 @@ jobs:
 
       - name: Login to ECR
         run: |
-          echo "Logging into Amazon ECR..."
-
           aws ecr get-login-password --region "$AWS_REGION" |
-            docker login \
-              --username AWS \
-              --password-stdin "$ECR_REGISTRY"
+            docker login --username AWS --password-stdin "$ECR_REGISTRY"
 
-          echo "ECR login successful."
-
-      - name: Build Docker image
+      - name: Build and push image
         run: |
-          echo "Building Docker image..."
-
-          docker build \
-            -t "$ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA" \
-            .
-
-          echo "Docker image built successfully."
-
-      - name: Push image to ECR
-        run: |
-          echo "Pushing Docker image to ECR..."
-
-          docker push \
-            "$ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA"
-
-          echo "Docker image pushed successfully."
+          docker build -t "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" .
+          docker push "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
       - name: Deploy to EC2
         run: |
-          echo "Starting EC2 deployment..."
-
           mkdir -p ~/.ssh
-
           echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/ec2_key
           chmod 600 ~/.ssh/ec2_key
+          ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts
 
-          echo "Checking SSH key..."
-          ssh-keygen -y -f ~/.ssh/ec2_key > /tmp/ec2_public_key
-          echo "SSH key is valid."
+          ssh -i ~/.ssh/ec2_key ec2-user@"${{ secrets.EC2_HOST }}" << EOF
+            set -e
 
-          echo "Checking EC2 host..."
+            aws ecr get-login-password --region "$AWS_REGION" |
+              docker login --username AWS --password-stdin "$ECR_REGISTRY"
 
-          if [ -z "${{ secrets.EC2_HOST }}" ]; then
-            echo "ERROR: EC2_HOST secret is empty."
-            exit 1
-          fi
+            docker pull "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
-          echo "EC2_HOST secret exists."
+            docker stop flask-cicd-app 2>/dev/null || true
+            docker rm flask-cicd-app 2>/dev/null || true
 
-          ssh-keyscan \
-            -T 10 \
-            -H "${{ secrets.EC2_HOST }}" \
-            >> ~/.ssh/known_hosts
+            docker run -d \
+              --name flask-cicd-app \
+              --restart unless-stopped \
+              -p 5000:5000 \
+              "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
-          echo "EC2 host key retrieved successfully."
+            sleep 5
 
-          echo "Connecting to EC2..."
+            curl --fail http://localhost:5000/health
 
-          ssh \
-            -o ConnectTimeout=15 \
-            -i ~/.ssh/ec2_key \
-            ec2-user@"${{ secrets.EC2_HOST }}" << EOF
-
-          set -e
-
-          echo "Connected to EC2 successfully."
-
-          echo "Checking AWS identity..."
-          aws sts get-caller-identity
-
-          echo "Checking Docker..."
-          docker --version
-
-          echo "Logging into ECR..."
-
-          aws ecr get-login-password \
-            --region "$AWS_REGION" |
-            docker login \
-              --username AWS \
-              --password-stdin "$ECR_REGISTRY"
-
-          echo "ECR login successful."
-
-          echo "Pulling Docker image..."
-
-          docker pull \
-            "$ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA"
-
-          echo "Docker image pulled successfully."
-
-          echo "Stopping old container..."
-
-          docker stop flask-cicd-app 2>/dev/null || true
-
-          echo "Removing old container..."
-
-          docker rm flask-cicd-app 2>/dev/null || true
-
-          echo "Starting new container..."
-
-          docker run -d \
-            --name flask-cicd-app \
-            --restart unless-stopped \
-            -p 5000:5000 \
-            "$ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA"
-
-          echo "Checking running container..."
-
-          docker ps
-
-          echo "Waiting for Flask application..."
-
-          sleep 5
-
-          echo "Container logs..."
-
-          docker logs flask-cicd-app
-
-          echo "Testing health endpoint..."
-
-          curl --fail http://localhost:5000/health
-
-          echo ""
-          echo "Deployment successful!"
-
+            echo "Deployment successful."
           EOF
-
-      - name: Deployment summary
-        if: success()
-        run: |
-          echo "CI/CD PIPELINE COMPLETED SUCCESSFULLY"
-          echo "Image: $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA"
-          echo "EC2 deployment completed successfully."
-          echo "Flask health check passed."
-
-      - name: Deployment failed
-        if: failure()
-        run: |
-          echo "CI/CD PIPELINE FAILED"
-          echo "Please check the failed step above."
