@@ -1,18 +1,12 @@
 ## Screenshots
 
 ### 1. GitHub Repository
-
-Created the GitHub repository to store the Flask application, Docker configuration, tests, and CI/CD workflow.
-
-![GitHub Repository](screenshots/01-github-repository.png)
-
----
-
 ### 2. Project Structure
 
+Created the GitHub repository to store the Flask application, Docker configuration, tests, and CI/CD workflow.
 Created the basic project structure containing the Flask application, tests, Dockerfile, requirements, and GitHub Actions workflow.
 
-![Project Structure](screenshots/02-project-structure.png)
+![GitHub Repository](https://github.com/HamidSiddiqui12/CI-CD-Pipeline-Assignment/blob/main/Snapshots/Screenshot%202026-08-13%20095121.png)
 
 ---
 
@@ -20,7 +14,7 @@ Created the basic project structure containing the Flask application, tests, Doc
 
 Created the Flask application with a home endpoint and a `/health` endpoint for deployment verification.
 
-![Flask Application](screenshots/03-flask-application.png)
+![Flask Application](https://github.com/HamidSiddiqui12/CI-CD-Pipeline-Assignment/blob/main/Snapshots/Screenshot%202026-08-05%20073954.png)
 
 ---
 
@@ -28,7 +22,7 @@ Created the Flask application with a home endpoint and a `/health` endpoint for 
 
 Created automated tests for the Flask application and verified that the tests pass before deployment.
 
-![Pytest Results](screenshots/04-pytest-results.png)
+![Pytest Results](https://github.com/HamidSiddiqui12/CI-CD-Pipeline-Assignment/blob/main/Snapshots/Screenshot%202026-08-05%20075307.png)
 
 ---
 
@@ -36,7 +30,8 @@ Created automated tests for the Flask application and verified that the tests pa
 
 Created the Dockerfile to package the Flask application and its dependencies into a container.
 
-![Dockerfile](screenshots/05-dockerfile.png)
+![Dockerfile](https://github.com/HamidSiddiqui12/CI-CD-Pipeline-Assignment/blob/main/Snapshots/Screenshot%202026-08-05%20080957.png)
+![Docker Build](https://github.com/HamidSiddiqui12/CI-CD-Pipeline-Assignment/blob/main/Snapshots/Screenshot%202026-08-05%20081008.png)
 
 ---
 
@@ -44,7 +39,7 @@ Created the Dockerfile to package the Flask application and its dependencies int
 
 Built the Docker image locally to verify that the application can be containerized successfully.
 
-![Docker Build](screenshots/06-docker-build.png)
+![Docker Build](https://github.com/HamidSiddiqui12/CI-CD-Pipeline-Assignment/blob/main/Snapshots/Screenshot%202026-08-05%20081448.png)
 
 ---
 
@@ -52,7 +47,9 @@ Built the Docker image locally to verify that the application can be containeriz
 
 Created the IAM role that allows GitHub Actions to securely access the required AWS resources.
 
-![IAM Role](screenshots/07-iam-role.png)
+![IAM Role](https://github.com/HamidSiddiqui12/CI-CD-Pipeline-Assignment/blob/main/Snapshots/Screenshot%202026-08-08%20200757.png)
+![IAM Role](https://github.com/HamidSiddiqui12/CI-CD-Pipeline-Assignment/blob/main/Snapshots/Screenshot%202026-08-11%20082629.png)
+![IAM Role](https://github.com/HamidSiddiqui12/CI-CD-Pipeline-Assignment/blob/main/Snapshots/Screenshot%202026-08-11%20082656.png)
 
 ---
 
@@ -60,7 +57,8 @@ Created the IAM role that allows GitHub Actions to securely access the required 
 
 Configured the trust policy to allow GitHub Actions to assume the AWS IAM role using OIDC.
 
-![IAM Trust Policy](screenshots/08-iam-trust-policy.png)
+![IAM Trust Policy](https://github.com/HamidSiddiqui12/CI-CD-Pipeline-Assignment/blob/main/Snapshots/Screenshot%202026-08-11%20082906.png)
+![IAM Trust Policy](https://github.com/HamidSiddiqui12/CI-CD-Pipeline-Assignment/blob/main/Snapshots/Screenshot%202026-08-08%20201052.png)
 
 ---
 
@@ -68,7 +66,8 @@ Configured the trust policy to allow GitHub Actions to assume the AWS IAM role u
 
 Configured the AWS role ARN as a GitHub Actions repository variable.
 
-![GitHub Actions Variables](screenshots/09-github-actions-variables.png)
+![GitHub Actions Variables](https://github.com/HamidSiddiqui12/CI-CD-Pipeline-Assignment/blob/main/Snapshots/Screenshot%202026-08-09%20012428.png)
+![GitHub Actions Variables](https://github.com/HamidSiddiqui12/CI-CD-Pipeline-Assignment/blob/main/Snapshots/Screenshot%202026-08-11%20082947.png)
 
 ---
 
@@ -76,7 +75,8 @@ Configured the AWS role ARN as a GitHub Actions repository variable.
 
 Configured the EC2 host and SSH private key as GitHub Actions secrets for secure EC2 deployment.
 
-![GitHub Actions Secrets](screenshots/10-github-actions-secrets.png)
+![GitHub Actions Secrets](https://github.com/HamidSiddiqui12/CI-CD-Pipeline-Assignment/blob/main/Snapshots/Screenshot%202026-08-08%20200229.png)
+![GitHub Actions Secrets](https://github.com/HamidSiddiqui12/CI-CD-Pipeline-Assignment/blob/main/Snapshots/Screenshot%202026-08-09%20011623.png)
 
 ---
 
@@ -84,7 +84,7 @@ Configured the EC2 host and SSH private key as GitHub Actions secrets for secure
 
 Created the ECR repository to store the Docker image used for deployment.
 
-![ECR Repository](screenshots/11-ecr-repository.png)
+![ECR Repository](https://github.com/HamidSiddiqui12/CI-CD-Pipeline-Assignment/blob/main/Snapshots/Screenshot%202026-08-06%20074707.png)
 
 ---
 
@@ -92,7 +92,7 @@ Created the ECR repository to store the Docker image used for deployment.
 
 Created and configured the Amazon Linux EC2 instance that hosts the Docker container.
 
-![EC2 Instance](screenshots/12-ec2-instance.png)
+![EC2 Instance](https://github.com/HamidSiddiqui12/CI-CD-Pipeline-Assignment/blob/main/Snapshots/IAM%20ROLE%20ATTACHED%20TO%20EC2.png)
 
 ---
 
@@ -100,7 +100,10 @@ Created and configured the Amazon Linux EC2 instance that hosts the Docker conta
 
 Configured the required inbound access for SSH and application traffic on port 5000.
 
-![EC2 Security Group](screenshots/13-ec2-security-group.png)
+![EC2 Security Group](https://github.com/HamidSiddiqui12/CI-CD-Pipeline-Assignment/blob/main/Snapshots/Screenshot%202026-08-14%20162916.png)
+
+With this I was able to remove the build -
+![EC2 Security Group](https://github.com/HamidSiddiqui12/CI-CD-Pipeline-Assignment/blob/main/Snapshots/Screenshot%202026-08-14%20162931.png)
 
 ---
 
@@ -108,7 +111,7 @@ Configured the required inbound access for SSH and application traffic on port 5
 
 Configured `cicd.yml` to automatically test, build, push, and deploy the application whenever code is pushed to the `main` branch.
 
-![GitHub Actions Workflow](screenshots/14-github-actions-workflow.png)
+https://github.com/HamidSiddiqui12/CI-CD-Pipeline-Assignment/blob/main/.github/workflows/cicd.yml
 
 ---
 
@@ -116,7 +119,8 @@ Configured `cicd.yml` to automatically test, build, push, and deploy the applica
 
 Verified that the Docker image was successfully built and pushed to the Amazon ECR repository.
 
-![ECR Image](screenshots/15-ecr-image.png)
+![ECR Image](https://github.com/HamidSiddiqui12/CI-CD-Pipeline-Assignment/blob/main/Snapshots/Screenshot%202026-08-12%20113902.png)
+![ECR Image](https://github.com/HamidSiddiqui12/CI-CD-Pipeline-Assignment/blob/main/Snapshots/Screenshot%202026-08-12%20112626.png)
 
 ---
 
@@ -124,7 +128,7 @@ Verified that the Docker image was successfully built and pushed to the Amazon E
 
 Pulled the ECR image on the EC2 instance and started the Flask application inside a Docker container.
 
-![EC2 Docker Container](screenshots/16-ec2-docker-container.png)
+![EC2 Docker Container](https://github.com/HamidSiddiqui12/CI-CD-Pipeline-Assignment/blob/main/Snapshots/Screenshot%202026-08-05%20081457.png)
 
 ---
 
@@ -132,7 +136,7 @@ Pulled the ECR image on the EC2 instance and started the Flask application insid
 
 Checked the Docker container logs to confirm that the Flask application started successfully and was listening on port 5000.
 
-![Container Logs](screenshots/17-container-logs.png)
+![Container Logs](https://github.com/HamidSiddiqui12/CI-CD-Pipeline-Assignment/blob/main/Snapshots/Screenshot%202026-08-12%20113848.png)
 
 ---
 
@@ -140,7 +144,7 @@ Checked the Docker container logs to confirm that the Flask application started 
 
 Tested the `/health` endpoint from the EC2 instance and received a successful healthy response.
 
-![Health Check](screenshots/18-health-check.png)
+![Health Check](https://github.com/HamidSiddiqui12/CI-CD-Pipeline-Assignment/blob/main/Snapshots/Screenshot%202026-08-12%20112408.png)
 
 ---
 
@@ -148,7 +152,7 @@ Tested the `/health` endpoint from the EC2 instance and received a successful he
 
 Verified that the deployed Flask application is accessible through the EC2 public IP address.
 
-![Flask Application](screenshots/19-flask-application.png)
+![Flask Application](https://github.com/HamidSiddiqui12/CI-CD-Pipeline-Assignment/blob/main/Snapshots/Screenshot%202026-08-12%20112311.png)
 
 ---
 
@@ -156,4 +160,4 @@ Verified that the deployed Flask application is accessible through the EC2 publi
 
 Verified that the complete GitHub Actions pipeline completed successfully from testing through deployment.
 
-![Successful CI/CD Pipeline](screenshots/20-successful-cicd-pipeline.png)
+![Successful CI/CD Pipeline](https://github.com/HamidSiddiqui12/CI-CD-Pipeline-Assignment/blob/main/Snapshots/Screenshot%202026-08-12%20112113.png)
